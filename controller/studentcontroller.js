@@ -168,3 +168,75 @@ exports.myfiles = async (req, res) => {
 
 
 //Assignment
+exports.assignment = async (req, res) => {
+    try {
+        const ass = req.body.ass;
+        if (!ass) throw 'Invalid request';
+        const currcourse = await course.findOne({ coursecode: ass });
+        if (!currcourse) throw 'Invalid course';
+        res.json({
+            status: "success",
+            message: currcourse.assignment
+        })
+    }
+    catch (err) {
+        res.json({
+            status: "error",
+            message: err
+        })
+    }
+}
+
+exports.getassignmentdetail = async(req,res)=>{
+    try{
+        const id = req.body.id;
+        const currassignment =await assignment.findById(id);
+        res.json({
+            status:"success",
+            message:currassignment
+        })
+    }
+    catch(err){
+        res.json({
+            status: "error",
+            message: err
+        })
+    }
+}
+
+exports.dwnldfile = async(req,res)=>{
+    try{
+        const id = req.params.id;
+        const currtext =await textdata.findOne({_id:id});
+        if(!currtext)throw 'textdata not found';
+        const filelocation =currtext.filelocation;
+        var file = fs.readFileSync(`${__dirname}/../${filelocation}.pdf`);
+        res.write(file, 'binary');
+        res.end();
+    }
+    catch(err){
+        res.json({
+            status: "error",
+            message: err
+        })
+    }
+}
+
+exports.gettext = async(req,res)=>{
+    try{
+        const id = req.body.textid;
+        const currtext = await textdata.findById(id);
+        if(!currtext)throw'invalid';
+        
+        res.json({
+            status: "success",
+            message: currtext
+        })
+    }
+    catch(err){
+        res.json({
+            status: "error",
+            message: err
+        })
+    }
+}
