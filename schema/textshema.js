@@ -27,6 +27,10 @@ const textschema = new mongoose.Schema({
         type:String,
         default:0
     },
+    plagiarismcheck:{
+        type:String,
+        default: "pending"
+    },
     plagiarism:{
         type:Object
     }
