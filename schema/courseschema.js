@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 
 const courseschema = new mongoose.Schema({
-    name: {
-        type: String,
-        unique: [true]
+    name:{
+        type:String,
+        unique:[true]
     },
-    branch: {
-        type: String
+    branch:{
+        type:String
     },
-    coursecode: {
-        type: String,
-        unique: [true]
+    coursecode:{
+        type:String,
+        unique:[true]
     },
-    enrolledstudent: {
-        type: Array
+    teacher:{
+        type:String
     },
-    assignment: {
-        type: Array
+    enrolledstudent:{
+        type:Array
+    },
+    assignment:{
+        type:Array
     }
 });
 
-const course = mongoose.model('course', courseschema);
+const course = mongoose.model('course',courseschema);
 module.exports = course;
