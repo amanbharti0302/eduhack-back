@@ -1,13 +1,19 @@
-const student = require("../schema/studentschema")
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const vision = require('@google-cloud/vision');
 dotenv.config({ path: '../config.env' });
 const multer = require('multer');
-const course = require('../schema/courseschema');
 const { promisify } = require('util');
+const fs = require('fs');
+const { error } = require("console");
+var convertapi = require('convertapi')(`WWBieKt9OWuKAGZL`);
 
+const textdata = require('../schema/textshema');
+const course = require('../schema/courseschema');
+const student = require("../schema/studentschema");
+const assignment = require('../schema/assignmentschema');
+const { nextTick } = require('process');
 
 exports.newstudent = async (req, res) => {
     try {
@@ -19,8 +25,25 @@ exports.newstudent = async (req, res) => {
     }
 }
 
-
-
+exports.getstudent = async(req,res)=>{
+    try{
+        const token = await req.body.token;
+        if(!token)throw 'authentication failed';
+        const decoded_id = await promisify(jwt.verify)(token, 'iamadumb');
+        const currstudent =await student.findById(decoded_id.id);
+        currstudent.password='';
+        res.json({
+            status:"success",
+            message:currstudent
+        })
+    }
+    catch(err){
+        res.json({
+            status:"error",
+            message:err
+        })
+    }
+}
 
 
 //SignUp
@@ -64,7 +87,7 @@ exports.login = async (req, res) => {
 
         if (!await bcrypt.compare(password, currstudent.password)) throw 'Incorrect password';
         const id = await currstudent._id;
-        const token = jwt.sign({ id }, 'iamadumb', { expiresIn: '90d' });
+        const token = jwt.sign({ id },'iamadumb', { expiresIn:'90d' });
         currstudent.password = undefined;
         res.json({
             status: "success",
@@ -80,9 +103,68 @@ exports.login = async (req, res) => {
     }
 }
 
+//MyFiles
+exports.myfiles = async (req, res) => {
+    try {
+        const name = await req.body.name;
+        const rollno = await req.body.rollno;
+        const email = await req.body.email;
+        const assignmentid = await req.body.assignmentid;
+        const coursecode = await req.body.coursecode;
+        const filename = await req.files[0].originalname;
+        const filepath = await req.files[0].path;
+        const filelocation = `${__dirname}/../${filepath}.pdf`;
+        fs.renameSync(`${__dirname}/../${filepath}`, filelocation, (err) => { if (err) console.log(err); })
+        
+        var currassignment = await assignment.findById(assignmentid);
+        var data;
+        
+        await convertapi.convert('extract-images', { File: `./${filepath}.pdf` }, 'pdf').then(async (result)=> {
+            return result.saveFiles(`${__dirname}/../img`);
+        }).then(async (file) => {
+            data = await file;
+        }).catch((e) => {
+            fs.unlinkSync(filelocation);
+            res.json({
+                status: "error",
+                message: e
+            })
+        })
+
+        var finaltext="ll";
+        var newtext = await textdata.create({ name: name, rollno: rollno, email: email,text: finaltext,coursecode:coursecode,filelocation:filepath,filename:filename});
+        
+        await currassignment.student.push({rollno:rollno,id:newtext._id});
+        currassignment.save();
+
+        await data.map(async (el) => {
+                const clientOptions = { apiEndpoint: 'eu-vision.googleapis.com' };
+                const client = new vision.ImageAnnotatorClient();
+                const [result] = await client.textDetection(el);
+                const fullTextAnnotation =await result.fullTextAnnotation;
+                fs.unlinkSync(el);
+                if(fullTextAnnotation!=null){
+                    finaltext =finaltext + fullTextAnnotation.text;
+                    newtext.text =finaltext;
+                    await newtext.save();
+                }
+        })
+        
+        res.json({
+            message: "hello",
+            status: "success"
+        })
+
+    }
+    catch (err) {
+        console.log('error');
+        console.log(err);
+        res.json({
+            status: "error",
+            message: err
+        })
+    }
+}
 
 
-
-
-
-
+//Assignment

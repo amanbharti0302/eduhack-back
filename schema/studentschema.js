@@ -20,16 +20,16 @@ const studentschema = new mongoose.Schema({
         type: String,
         required: true
     },
-    course: {
-        type: Array,
-        required: true
-    },
     status: {
         type: String,
         default: "inactive"
     },
     password: {
         type: String
+    },
+    course: {
+        type: Array,
+        required: true
     }
 })
 
