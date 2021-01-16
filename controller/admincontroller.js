@@ -34,3 +34,29 @@ exports.newstudent = async (req, res) => {
     }
 }
 
+exports.addcoursetoprof = async(req,res)=>{
+    try{
+        // console.log(req.body);
+        const courseid = req.body.courseid;
+        const profemail = req.body.profemail;
+
+        if(!courseid||!profemail)throw 'Incomplete data';
+        const currcourse = await course.findOne({coursecode:courseid});
+        const currprof = await professor.findOne({email:profemail});
+        if(!currcourse||!currprof)throw 'wrong data';
+        currprof.course.push({name:currcourse.name,branch:currcourse.branch,coursecode:currcourse.coursecode});
+        currprof.save();
+        
+        res.json({
+            status:"success",
+            message: currcourse
+        })
+
+    }
+    catch(err){
+        res.json({
+            status:"error",
+            message:err
+        })
+    }
+}
