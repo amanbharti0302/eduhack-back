@@ -171,11 +171,7 @@ exports.assigncourse = async(req,res)=>{
         const currstudent = await student.findOne({email:studentemail});
         if(!currcourse||!currstudent)throw 'wrong data';
         currstudent.course.push({name:currcourse.name,branch:currcourse.branch,coursecode:currcourse.coursecode});
-<<<<<<< HEAD
         await currcourse.enrolledstudent.push({name:currstudent.name,email:currstudent.email,roll:currstudent.rollno});
-=======
-        await currcourse.enrolledstudent.push({name:currstudent.name,email:currstudent.email,roll:currstudent.roll});
->>>>>>> 191b84ff1264b3128540044b5f264518c11719a6
         currcourse.save();
         currstudent.save();
         
