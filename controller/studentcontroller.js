@@ -106,6 +106,7 @@ exports.login = async (req, res) => {
 //MyFiles
 exports.myfiles = async (req, res) => {
     try {
+        console.log('okk');
         const name = await req.body.name;
         const rollno = await req.body.rollno;
         const email = await req.body.email;
@@ -114,16 +115,19 @@ exports.myfiles = async (req, res) => {
         const filename = await req.files[0].originalname;
         const filepath = await req.files[0].path;
         const filelocation = `${__dirname}/../${filepath}.pdf`;
+
         fs.renameSync(`${__dirname}/../${filepath}`, filelocation, (err) => { if (err) console.log(err); })
         
         var currassignment = await assignment.findById(assignmentid);
         var data;
-        
+        //console.log(currassignment);
+
         await convertapi.convert('extract-images', { File: `./${filepath}.pdf` }, 'pdf').then(async (result)=> {
             return result.saveFiles(`${__dirname}/../img`);
         }).then(async (file) => {
             data = await file;
         }).catch((e) => {
+            // console.log('find');
             fs.unlinkSync(filelocation);
             res.json({
                 status: "error",

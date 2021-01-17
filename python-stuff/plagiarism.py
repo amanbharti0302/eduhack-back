@@ -49,7 +49,7 @@ for text in input_text_container:
         n=n-1;
         continue;
     try:
-        urls=search(text, tld="co.in", num=5, stop=5, pause=2);
+        urls=search(text, tld="co.in", num=2, stop=2, pause=2);
         for url in urls:
             if(url[-4:]!=".pdf"):
                 try:
@@ -71,7 +71,7 @@ for key in map_url_to_match_no.keys():
 map_url_to_match_no
 
 output={
-    "plagiarism-percentage": ans/n,
+    "plagiarism_percentage": ans/n,
     "urls": map_url_to_match_no
 }
 
