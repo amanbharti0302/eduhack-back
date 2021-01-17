@@ -13,6 +13,7 @@ const handlePython=(path,req,res)=>{
 			model_output=model_output.replace(/'/g,'"');
 			processed=true;
 			model_output=JSON.parse(model_output);
+			console.log(model_output);
 			return res.json(model_output);
 		}
 		catch(err){

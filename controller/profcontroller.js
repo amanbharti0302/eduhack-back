@@ -155,3 +155,85 @@ exports.login = async (req, res) => {
         })
     }
 }
+
+exports.assigncourse = async(req,res)=>{
+    try{
+        const token = req.body.token;
+        if(!token)throw 'authentication failed';
+        const decoded_id = await promisify(jwt.verify)(token,'iamadumb');
+        const currprofessor = professor.findById(decoded_id);
+        if(!currprofessor)throw 'authentication failed';
+        const courseid = req.body.courseid;
+        const studentemail = req.body.studentemail;
+
+        if(!courseid||!studentemail)throw 'Incomplete data';
+        const currcourse = await course.findOne({coursecode:courseid});
+        const currstudent = await student.findOne({email:studentemail});
+        if(!currcourse||!currstudent)throw 'wrong data';
+        currstudent.course.push({name:currcourse.name,branch:currcourse.branch,coursecode:currcourse.coursecode});
+        await currcourse.enrolledstudent.push({name:currstudent.name,email:currstudent.email,roll:currstudent.roll});
+        currcourse.save();
+        currstudent.save();
+        
+        res.json({
+            status:"success",
+            message:`course added to ${currstudent.name}`
+        })
+    }
+    catch(err){
+        res.json({
+            status:"error",
+            message:err
+        })
+    }
+}
+
+exports.newassignment = async(req,res)=>{
+    try{
+        const token = req.body.token;
+        const name = req.body.name;
+        const coursecode = req.body.coursecode;
+        const description = req.body.description;
+        if(!token||!name||!coursecode||!description)throw 'invalid request';
+        const decoded_id = await promisify(jwt.verify)(token,'iamadumb');
+        const currprofessor = professor.findById(decoded_id);
+        if(!currprofessor)throw 'authentication failed';
+        const currcourse = await course.findOne({coursecode:coursecode});
+        if(!currcourse)throw 'invalid request';
+        const currassignment = await assignment.create({name:name,description:description});
+        currcourse.assignment.push(currassignment._id);
+        currcourse.save();
+
+        res.json({
+            status:"success",
+            message:"currcourse"
+        });
+    }
+    catch(err){
+        res.json({
+            status:"error",
+            message:err
+        })
+    }
+}
+
+exports.givemarks = async(req,res)=>{
+    try{
+        const textid = req.body.textid;
+        const marks = req.body.marks;
+        const currtext = await textdata.findById(textid);
+        if(!currtext)throw 'invalid request';
+        currtext.marks=marks;
+        currtext.save();
+        res.json({
+            status:"success",
+            message:currtext
+        })
+    }
+    catch(err){
+        res.json({
+            status:"error",
+            message:err
+        })
+    }
+}
