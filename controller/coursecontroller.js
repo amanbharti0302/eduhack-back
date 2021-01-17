@@ -42,11 +42,19 @@ exports.getcourseperformance = async(req,res)=>{
             var result = 0;
             const currassignment = await assignment.findById(el);
             var len = currassignment.student.length;
+<<<<<<< HEAD
+=======
+            
+>>>>>>> 191b84ff1264b3128540044b5f264518c11719a6
             await Promise.all(currassignment.student.map(async(el2)=>{
                 const id = el2.id;
                 const currtext = await textdata.findById(id);
                 result+=parseInt(currtext.marks);
             }));
+<<<<<<< HEAD
+=======
+
+>>>>>>> 191b84ff1264b3128540044b5f264518c11719a6
             performance.push(result/len);
         }))
 
